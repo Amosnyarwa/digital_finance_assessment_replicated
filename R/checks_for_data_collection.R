@@ -6,7 +6,7 @@ library(glue)
 
 # read data
 
-df_tool_data_an <- readxl::read_excel("input/UGA2103_Financial_Service_Providers_Assessment_HH_Tool_June2021.xlsx") %>% 
+df_tool_data_an <- readxl::read_excel("inputs/UGA2103_Financial_Service_Providers_Assessment_HH_Tool_June2021.xlsx") %>% 
  mutate(i.uuid = `_uuid`, 
         i.start_date = as_date(start),
         i.enumerator_id = enumerator_id,
@@ -15,10 +15,10 @@ df_tool_data_an <- readxl::read_excel("input/UGA2103_Financial_Service_Providers
         end = as_datetime(end)) %>% 
   filter(consent == "yes", i.start_date > as_date("21-08-29"))
 
-df_survey_an <- readxl::read_excel("input/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "survey")
-df_choices_an <- readxl::read_excel("input/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "choices")
+df_survey_an <- readxl::read_excel("inputs/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "survey")
+df_choices_an <- readxl::read_excel("inputs/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "choices")
 
-df_sample_data_an <- sf::st_read("input/dfa_settlement_host_samples.gpkg", quiet = TRUE)        
+df_sample_data_an <- sf::st_read("inputs/dfa_settlement_host_samples.gpkg", quiet = TRUE)        
 
 
 # output holder ------------------------------------------------------------
