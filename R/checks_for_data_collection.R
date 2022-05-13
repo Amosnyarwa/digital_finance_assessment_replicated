@@ -4,6 +4,7 @@ library(tidyverse)
 library(lubridate)
 library(glue)
 
+source("R/support_functions.R")
 # read data
 
 df_tool_data_an <- readxl::read_excel("inputs/UGA2103_Financial_Service_Providers_Assessment_HH_Tool_June2021.xlsx") %>% 
@@ -24,6 +25,53 @@ df_sample_data_an <- sf::st_read("inputs/dfa_settlement_host_samples.gpkg", quie
 # output holder ------------------------------------------------------------
 
 logic_output <- list()   
+
+
+# data not meeting minimum requirements -----------------------------------
+
+# no_consent_not_hoh
+df_no_consent_not_hoh <- df_tool_data_an %>% 
+  filter(hoh == "no") %>% 
+  mutate(i.check.type = "remove_survey",
+         i.check.name = "hoh",
+         i.check.current_value = as.character(hoh),
+         i.check.value = "",
+         i.check.issue_id = "logic_m_requirement_no_consent_not_hoh",
+         i.check.issue = "no_consent_not_hoh",
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "",
+         i.check.reviewed = "1",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("i.check")) %>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check", replacement = ""))
+
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_no_consent_not_hoh")
+
+# below age
+df_respondents_not_of_age <- df_tool_data_an %>% 
+  filter(respondent_age < 18) %>% 
+  mutate(i.check.type = "remove_survey",
+         i.check.name = "respondent_age",
+         i.check.current_value = as.character(respondent_age),
+         i.check.value = "",
+         i.check.issue_id = "logic_m_requirement_below_age",
+         i.check.issue = "below_age",
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "1",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("i.check")) %>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_respondents_not_of_age")
 
 
 # Time checks -------------------------------------------------------------
@@ -89,12 +137,12 @@ df_c_survey_time_an <- df_tool_data_an %>%
   dplyr::select(starts_with("i")) %>% 
   rename_with(~str_replace(string = .x, pattern = "i", replacement = ""))
               
-if(exists("df_c_time_btn_surveys_an"))
+if(exists("df_c_time_btn_surveys_an")){
   if(nrow(df_c_survey_time_an) > 0){
     logic_output$df_c_time_btn_survey_an <- df_c_time_btn_survey_an
-  
-  
+  }
 }
+  
          
 
 # Logical checks ----------------------------------------------------------
