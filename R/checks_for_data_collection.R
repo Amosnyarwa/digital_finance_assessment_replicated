@@ -8,13 +8,13 @@ source("R/support_functions.R")
 # read data
 
 df_tool_data_an <- readxl::read_excel("inputs/UGA2103_Financial_Service_Providers_Assessment_HH_Tool_June2021.xlsx") %>% 
- mutate(i.uuid = `_uuid`, 
-        i.start_date = as_date(start),
-        i.enumerator_id = enumerator_id,
-        i.point_number = point_number,
+ mutate(z.uuid = `_uuid`, 
+        z.start_date = as_date(start),
+        z.enumerator_id = enumerator_id,
+        z.point_number = point_number,
         start = as_datetime(start),
         end = as_datetime(end)) %>% 
-  filter(consent == "yes", i.start_date > as_date("21-08-29"))
+  filter(consent == "yes", z.start_date > as_date("21-08-29"))
 
 df_survey_an <- readxl::read_excel("inputs/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "survey")
 df_choices_an <- readxl::read_excel("inputs/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "choices")
@@ -32,44 +32,44 @@ logic_output <- list()
 # no_consent_not_hoh
 df_no_consent_not_hoh <- df_tool_data_an %>% 
   filter(hoh == "no") %>% 
-  mutate(i.check.type = "remove_survey",
-         i.check.name = "hoh",
-         i.check.current_value = as.character(hoh),
-         i.check.value = "",
-         i.check.issue_id = "logic_m_requirement_no_consent_not_hoh",
-         i.check.issue = "no_consent_not_hoh",
-         i.check.other_text = "",
-         i.check.checked_by = "",
-         i.check.checked_date = as_date(today()),
-         i.check.comment = "",
-         i.check.reviewed = "1",
-         i.check.adjust_log = "",
-         i.check.uuid_cl = "",
-         i.check.so_sm_choices = "") %>% 
-  dplyr::select(starts_with("i.check")) %>% 
-  rename_with(~str_replace(string = .x, pattern = "i.check", replacement = ""))
+  mutate(z.type = "remove_survey",
+         z.name = "hoh",
+         z.current_value = as.character(hoh),
+         z.value = "",
+         z.issue_id = "logic_m_requirement_no_consent_not_hoh",
+         z.issue = "no_consent_not_hoh",
+         z.other_text = "",
+         z.checked_by = "",
+         z.checked_date = as_date(today()),
+         z.comment = "",
+         z.reviewed = "1",
+         z.adjust_log = "",
+         z.uuid_cl = "",
+         z.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("z.")) %>% 
+  rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_no_consent_not_hoh")
 
 # below age
 df_respondents_not_of_age <- df_tool_data_an %>% 
   filter(respondent_age < 18) %>% 
-  mutate(i.check.type = "remove_survey",
-         i.check.name = "respondent_age",
-         i.check.current_value = as.character(respondent_age),
-         i.check.value = "",
-         i.check.issue_id = "logic_m_requirement_below_age",
-         i.check.issue = "below_age",
-         i.check.other_text = "",
-         i.check.checked_by = "",
-         i.check.checked_date = as_date(today()),
-         i.check.comment = "", 
-         i.check.reviewed = "1",
-         i.check.adjust_log = "",
-         i.check.uuid_cl = "",
-         i.check.so_sm_choices = "") %>% 
-  dplyr::select(starts_with("i.check")) %>% 
-  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+  mutate(z.type = "remove_survey",
+         z.name = "respondent_age",
+         z.current_value = as.character(respondent_age),
+         z.value = "",
+         z.issue_id = "logic_m_requirement_below_age",
+         z.issue = "below_age",
+         z.other_text = "",
+         z.checked_by = "",
+         z.checked_date = as_date(today()),
+         z.comment = "", 
+         z.reviewed = "1",
+         z.adjust_log = "",
+         z.uuid_cl = "",
+         z.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("z.")) %>% 
+  rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_respondents_not_of_age")
 
@@ -84,24 +84,24 @@ max_time_of_survey <- 120
 df_c_survey_time_an <- df_tool_data_an %>% 
   mutate(int.survey_time_interval = lubridate::time_length(end - start, unit = "min"),
          int.survey_time_interval = ceiling(int.survey_time_interval),
-         i.type = "remove_survey",
-         i.name = "point_number",
-         i.current_value = "",
-         i.value = "",
-         i.issue_id = case_when(
+         z.type = "remove_survey",
+         z.name = "point_number",
+         z.current_value = "",
+         z.value = "",
+         z.issue_id = case_when(
            int.survey_time_interval < min_time_of_survey ~ "less_survey_time",
            int.survey_time_interval > max_time_of_survey ~ "more_survey_time",
            TRUE ~ "normal_survey_time"),
-         i.issue = glue("{int.survey_time_interval} min taken to do the survey"),
-         i.other_text = "",
-         i.checked_by = "",
-         i.checked_date = as_date(today()),
-         i.comment = "",
-         i.reviewed = "",
-         i.adjust_log = "",
-         i.uuid_cl = paste0(i.uuid, "_", i.type, "_", i.name),
-         i.so_sm_choices = "") %>% 
-  filter(i.issue_id %in% c("less_survey_time", "more_survey_time"))
+         z.issue = glue("{int.survey_time_interval} min taken to do the survey"),
+         z.other_text = "",
+         z.checked_by = "",
+         z.checked_date = as_date(today()),
+         z.comment = "",
+         z.reviewed = "",
+         z.adjust_log = "",
+         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.so_sm_choices = "") %>% 
+  filter(z.issue_id %in% c("less_survey_time", "more_survey_time"))
 
 if(exists("df_c_survey_time_an")){
   if(nrow(df_c_survey_time_an) > 0){
@@ -338,7 +338,42 @@ if(exists("df_c_reason_not_want_card_an")){
     logic_output$df_c_reason_not_want_card_an <- df_c_reason_not_want_card_an
   }
 }  
+# 
+# spatial checks ----------------------------------------------------------
 
+sample_pt_nos_an <- df_sample_data_an %>% 
+  mutate(unique_pt_number = paste0(status, "_", Name)) %>% 
+  pull(unique_pt_number) %>% 
+  unique()
+
+# duplicate point numbers
+df_c_duplicate_pt_nos_an <- df_tool_data_an %>% 
+  mutate(unique_pt_number = paste0(status, "_", point_number )) %>% 
+  group_by(i.check.district_name, status, i.check.point_number) %>% 
+  filter(n() > 1, unique_pt_number %in% sample_pt_nos_an) %>% 
+  mutate(i.check.type = "change_response",
+         i.check.name = "point_number",
+         i.check.current_value = point_number,
+         i.check.value = "",
+         i.check.issue_id = "spatial_c_duplicate_pt_no",
+         i.check.issue = glue("point_number: {point_number} is duplicated: check that its not a repeated survey"),
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  ungroup() %>%
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+if(exists("df_c_duplicate_pt_nos_an")){
+  if(nrow(df_c_duplicate_pt_nos_an) > 0){
+    logic_output$df_c_duplicate_pt_nos_an <- df_c_duplicate_pt_nos_an
+  }
+}
 
 
 
