@@ -217,19 +217,127 @@ df_c_language_an <- df_tool_data_an %>%
          i.check.comment = "", 
          i.check.reviewed = "",
          i.check.adjust_log = "",
-         i.check.uuid_cl = paste0(i.check.uuid, "_", i.check.type, "_", i.check.name),
+         i.check.uuid_cl = "",
          i.check.so_sm_choices = "") %>% 
   filter(i.check.issue_id == "logic_c_main_language") %>% 
   dplyr::select(starts_with("i.check"))%>% 
   rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
 
-if(exists("df_c_language")){
-  if(nrow(df_c_language) > 0){
-    logic_output$df_c_language <- df_c_language
+if(exists("df_c_language_an")){
+  if(nrow(df_c_language_an) > 0){
+    logic_output$df_c_language_an <- df_c_language_an
   }
 }
-  
-  
+
+# If respondent has selected "none" in addition to another option, the survey needs to be checked.
+# type_phone_owned
+
+df_c_type_phone_owned_an <- df_tool_data_an %>% 
+  rowwise() %>% 
+  mutate(int.type_phone_owned_count = sum(c_across(starts_with("type_phone_owned/")), na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  mutate(i.check.type = "remove_option",
+         i.check.name = "type_phone_owned",
+         i.check.current_value = "none",
+         i.check.value = "none",
+         i.check.issue_id = ifelse(int.type_phone_owned_count > 1 & `type_phone_owned/none` == 1, "logic_c_type_phone_owned", "expected_response"),
+         i.check.issue = glue("none option selected with other options: {type_phone_owned}"),
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  filter(i.check.issue_id == "logic_c_type_phone_owned") %>% 
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+if(exists("df_c_type_phone_owned_an")){
+  if(nrow(df_c_type_phone_owned_an) > 0){
+    logic_output$df_c_type_phone_owned_an <- df_c_type_phone_owned_an
+  }
+}
+# If they previously selected "yes" to having mobile internet coverage (Q56) and now replied "no", the survey needs to be checked.
+# mobile_internet == "yes" and internet_awareness == "no"
+
+df_c_internet_awareness_an <- df_tool_data_an %>% 
+  filter(mobile_internet == "yes", internet_awareness == "no") %>% 
+  mutate(i.check.type = "change_response",
+         i.check.name = "internet_awareness",
+         i.check.current_value = internet_awareness,
+         i.check.value = NA,
+         i.check.issue_id = "logic_c_internet_awareness",
+         i.check.issue = "mobile_internet: yes but internet_awareness: no",
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+if(exists("df_c_internet_awareness_an")){
+  if(nrow(df_c_internet_awareness_an) > 0){
+    logic_output$df_c_internet_awareness_an <- df_c_internet_awareness_an
+  }
+}  
+# If in previous qn "why do you want to have  a mobile money account?" they answered "it is safer than keeping cash at home" and they now asnwered "the system is not safe i am concerned that my money will disappear", survey needs to be checked
+# reason_want_mm_acc/safer_than_home == 1 and reason_not_open_mm_acc/unsafe_system
+df_c_reason_not_open_mm_acc_an <- df_tool_data_an %>% 
+  filter(`reason_want_mm_acc/safer_than_home` == 1, `reason_not_open_mm_acc/unsafe_system` == 1) %>% 
+  mutate(i.check.type = "remove_option",
+         i.check.name = "reason_not_open_mm_acc",
+         i.check.current_value = "unsafe_system",
+         i.check.value = "unsafe_system",
+         i.check.issue_id = "logic_c_reason_not_open_mm_acc",
+         i.check.issue = "reason_want_mm_acc: safer_than_home but reason_not_open_mm_acc: unsafe_system",
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+if(exists("df_c_reason_not_open_mm_acc_an")){
+  if(nrow(df_c_reason_not_open_mm_acc_an) > 0){
+    logic_output$df_c_reason_not_open_mm_acc_an <- df_c_reason_not_open_mm_acc_an
+  }
+}
+# if in previous question 'Why do you want to have a pre-paid or smart card?' answered "it will allow me to securely store my money" and they now chose "the system is not safe i am concerned that my money will disappear", check survey
+# reason_want_card/safe_storage and reason_not_want_card/unsafe_system
+df_c_reason_not_want_card_an <- df_tool_data_an %>% 
+  filter(`reason_want_card/safe_storage` == 1, `reason_not_want_card/unsafe_system` == 1) %>% 
+  mutate(i.check.type = "remove_option",
+         i.check.name = "reason_not_want_card",
+         i.check.current_value = "unsafe_system",
+         i.check.value = "unsafe_system",
+         i.check.issue_id = "logic_c_reason_not_want_card",
+         i.check.issue = "reason_want_card: safer_than_home but reason_not_want_card: unsafe_system",
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = "",
+         i.check.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+if(exists("df_c_reason_not_want_card_an")){
+  if(nrow(df_c_reason_not_want_card_an) > 0){
+    logic_output$df_c_reason_not_want_card_an <- df_c_reason_not_want_card_an
+  }
+}  
 
 
 
