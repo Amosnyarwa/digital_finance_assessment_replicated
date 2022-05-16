@@ -201,6 +201,33 @@ if(exists("df_c_id_type_an")){
     logic_output$df_c_id_type_an <- df_c_id_type_an
   }
 }
+
+# If respondents have selected a language but have NOT selected the same language that they previously selected for their main language, we need to check the survye.
+df_c_language_an <- df_tool_data_an %>% 
+  mutate(i.check.type = "change_response",
+         i.check.name = "main_language",
+         i.check.current_value = main_language,
+         i.check.value = "",
+         i.check.issue_id = ifelse(str_detect(string = language_understand, pattern = main_language, negate = TRUE) , 
+                                   "logic_c_main_language", "main_language_also_understood"),
+         i.check.issue = glue("main_language: {main_language} not in understood languages: {language_understand}"),
+         i.check.other_text = "",
+         i.check.checked_by = "",
+         i.check.checked_date = as_date(today()),
+         i.check.comment = "", 
+         i.check.reviewed = "",
+         i.check.adjust_log = "",
+         i.check.uuid_cl = paste0(i.check.uuid, "_", i.check.type, "_", i.check.name),
+         i.check.so_sm_choices = "") %>% 
+  filter(i.check.issue_id == "logic_c_main_language") %>% 
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "i.check.", replacement = ""))
+
+if(exists("df_c_language")){
+  if(nrow(df_c_language) > 0){
+    logic_output$df_c_language <- df_c_language
+  }
+}
   
   
 
