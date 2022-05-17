@@ -325,7 +325,7 @@ sample_pt_nos_an <- df_sample_data_an %>%
 # duplicate point numbers
 df_c_duplicate_pt_nos_an <- df_tool_data_an %>% 
   mutate(unique_pt_number = paste0(status, "_", point_number )) %>% 
-  group_by(z.district_name, status, z.point_number) %>% 
+  group_by(district_name, status, z.point_number) %>% 
   filter(n() > 1, unique_pt_number %in% sample_pt_nos_an) %>% 
   mutate(z.type = "change_response",
          z.name = "point_number",
@@ -348,9 +348,115 @@ df_c_duplicate_pt_nos_an <- df_tool_data_an %>%
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_duplicate_pt_nos_an")
 
 
+# pt id does not exist in sample
+
+df_c_pt_not_in_sample_an <- df_tool_data_an %>% 
+  mutate(unique_pt_number = paste0(status, "_", point_number )) %>% 
+  filter(!unique_pt_number %in% sample_pt_nos_an) %>% 
+  mutate(z.type = "change_response",
+         z.name = "point_number",
+         z.current_value = point_number,
+         z.value = "",
+         z.issue_id = "spatial_c_pt_no_not_in_sample",
+         z.issue = glue("point_number: {point_number} not in samples"),
+         z.other_text = "",
+         z.checked_by = "",
+         z.checked_date = as_date(today()),
+         z.comment = "", 
+         z.reviewed = "",
+         z.adjust_log = "",
+         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.so_sm_choices = "") %>% 
+  dplyr::select(starts_with("i.check"))%>% 
+  rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
+
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_pt_not_in_sample_an")
+
+# threshold distance exceeded
+
+threshold_dist <- 150
+
+df_sample_data_thresh_an <- df_sample_data_an %>% 
+  mutate(unique_pt_number = paste0(status, "_", Name)) %>% 
+  sf::st_transform(4326)
+
+df_tool_data_thresh_an <- df_tool_data_an %>% 
+  mutate(unique_pt_number = paste0(status, "_", point_number)) %>% 
+  sf::st_as_sf(coords = c("_geopoint_longitude","_geopoint_latitude"), crs = 4326)
+
+# sample_data_unique_pts
+sample_data_unique_pts_an <- df_sample_data_thresh_an %>%  
+  pull(unique_pt_number) %>% 
+  unique()
+# tool_data_unique_pts
+tool_data_unique_pts_an <- df_tool_data_thresh_an %>% 
+  pull(unique_pt_number) %>% 
+  unique()
+
+sample_pt_nos_thresh_an <- sample_data_unique_pts_an[sample_data_unique_pts_an %in% tool_data_unique_pts_an]
+
+if(length(sample_pt_nos_thresh) > 0){
+  
+  # tibble to hold the data
+  df_data_with_distance_an <- tibble()
+  
+  for (pt_number in sample_pt_nos_thresh_an){
+    current_sample <- df_sample_data_thresh_an %>% 
+      filter(unique_pt_number == pt_number)
+    current_tool_data <- df_tool_data_thresh_an %>% 
+      filter(unique_pt_number == pt_number) 
+    
+    if(nrow(current_tool_data) > 0){
+      current_sample_target_dist <- sf::st_distance(x = current_sample, y = current_tool_data, by_element = TRUE)
+      
+      current_data_with_dist <- current_tool_data %>% 
+        sf::st_drop_geometry() %>% 
+        mutate(distance = round(x = current_sample_target_dist, digits = 0))
+      
+      df_data_with_distance_an <- bind_rows(df_data_with_distance_an, current_data_with_dist)
+    }
+  }
+  
+  # format the required data
+  df_c_greater_thresh_distance_an <- df_data_with_distance_an %>% 
+    filter(as.numeric(distance) >= threshold_dist) %>% 
+    mutate(z.type = "remove_survey",
+           z.name = "point_number",
+           z.current_value = point_number,
+           z.value = "",
+           z.issue_id = "spatial_c_dist_to_sample_greater_than_threshold",
+           z.issue = glue("{distance} m greater_than_threshold:{threshold_dist} m"),
+           z.other_text = "",
+           z.checked_by = "",
+           z.checked_date = as_date(today()),
+           z.comment = "", 
+           z.reviewed = "",
+           z.adjust_log = "",
+           z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+           z.so_sm_choices = "") %>% 
+    dplyr::select(starts_with("z."))%>% 
+    rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
+}
+
+if(exists("df_c_greater_thresh_distance_an")){
+  if(nrow(df_c_greater_thresh_distance_an) > 0){
+    logic_output$df_c_greater_thresh_distance_an <- df_c_greater_thresh_distance_an
+  }
+}
+
+# combine checks ----------------------------------------------------------
+
+df_logic_checks <- bind_rows(logic_output)
+
+# others checks
+
+df_others_data <- extract_other_data(input_tool_data = df_tool_data, input_survey = df_survey, input_choices = df_choices)
 
 
+# combine logic and others checks
+df_combined_checks <- bind_rows(df_logic_checks, df_others_data)
 
-
+# output the resulting data frame
+write_csv(x = df_combined_checks, file = paste0("outputs/", butteR::date_file_prefix(), "_combined_logic_spatial_and_others_checks.csv"), na = "")
 
   
