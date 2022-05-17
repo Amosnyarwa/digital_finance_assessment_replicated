@@ -103,11 +103,8 @@ df_c_survey_time_an <- df_tool_data_an %>%
          z.so_sm_choices = "") %>% 
   filter(z.issue_id %in% c("less_survey_time", "more_survey_time"))
 
-if(exists("df_c_survey_time_an")){
-  if(nrow(df_c_survey_time_an) > 0){
-    logic_output$df_c_survey_time_an <- df_c_survey_time_an
-  }
-}
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_survey_time_an")
+
 
 # check the time between surveys
 
@@ -136,12 +133,9 @@ df_c_survey_time_an <- df_tool_data_an %>%
          z.so_sm_choices = "") %>% 
   dplyr::select(starts_with("z.")) %>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
+
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_survey_time_an")
               
-if(exists("df_c_time_btn_surveys_an")){
-  if(nrow(df_c_survey_time_an) > 0){
-    logic_output$df_c_time_btn_survey_an <- df_c_time_btn_survey_an
-  }
-}
   
          
 
@@ -167,14 +161,9 @@ df_c_nationality_an <- df_tool_data_an %>%
   dplyr::select(starts_with("i")) %>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_nationality_an")){
-  if(nrow(df_c_nationality_an) > 0){
-    logic_output$df_c_nationality_an <- df_c_nationality_an
-    
-    
-  }
-  
-}        
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_nationality_an")
+
+     
         
 # Anyone who selected host for "type of community" and answers "refugee ID" or "beneficiary ID" should be checked.
 df_c_id_type_an <- df_tool_data_an %>% 
@@ -196,11 +185,9 @@ df_c_id_type_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_id_type_an")){
-  if(nrow(df_c_id_type_an) > 0){
-    logic_output$df_c_id_type_an <- df_c_id_type_an
-  }
-}
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_id_type_an")
+
+
 
 # If respondents have selected a language but have NOT selected the same language that they previously selected for their main language, we need to check the survye.
 df_c_language_an <- df_tool_data_an %>% 
@@ -223,11 +210,9 @@ df_c_language_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_language_an")){
-  if(nrow(df_c_language_an) > 0){
-    logic_output$df_c_language_an <- df_c_language_an
-  }
-}
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_language_an")
+
+
 
 # If respondent has selected "none" in addition to another option, the survey needs to be checked.
 # type_phone_owned
@@ -254,11 +239,8 @@ df_c_type_phone_owned_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_type_phone_owned_an")){
-  if(nrow(df_c_type_phone_owned_an) > 0){
-    logic_output$df_c_type_phone_owned_an <- df_c_type_phone_owned_an
-  }
-}
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_type_phone_owned_an")
+
 # If they previously selected "yes" to having mobile internet coverage (Q56) and now replied "no", the survey needs to be checked.
 # mobile_internet == "yes" and internet_awareness == "no"
 
@@ -281,11 +263,9 @@ df_c_internet_awareness_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_internet_awareness_an")){
-  if(nrow(df_c_internet_awareness_an) > 0){
-    logic_output$df_c_internet_awareness_an <- df_c_internet_awareness_an
-  }
-}  
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_internet_awareness_an")
+
+
 # If in previous qn "why do you want to have  a mobile money account?" they answered "it is safer than keeping cash at home" and they now asnwered "the system is not safe i am concerned that my money will disappear", survey needs to be checked
 # reason_want_mm_acc/safer_than_home == 1 and reason_not_open_mm_acc/unsafe_system
 df_c_reason_not_open_mm_acc_an <- df_tool_data_an %>% 
@@ -307,11 +287,9 @@ df_c_reason_not_open_mm_acc_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_reason_not_open_mm_acc_an")){
-  if(nrow(df_c_reason_not_open_mm_acc_an) > 0){
-    logic_output$df_c_reason_not_open_mm_acc_an <- df_c_reason_not_open_mm_acc_an
-  }
-}
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_reason_not_open_mm_acc_an")
+
+
 # if in previous question 'Why do you want to have a pre-paid or smart card?' answered "it will allow me to securely store my money" and they now chose "the system is not safe i am concerned that my money will disappear", check survey
 # reason_want_card/safe_storage and reason_not_want_card/unsafe_system
 df_c_reason_not_want_card_an <- df_tool_data_an %>% 
@@ -333,11 +311,9 @@ df_c_reason_not_want_card_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_reason_not_want_card_an")){
-  if(nrow(df_c_reason_not_want_card_an) > 0){
-    logic_output$df_c_reason_not_want_card_an <- df_c_reason_not_want_card_an
-  }
-}  
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_reason_not_want_card_an")
+
+
 # 
 # spatial checks ----------------------------------------------------------
 
@@ -369,11 +345,9 @@ df_c_duplicate_pt_nos_an <- df_tool_data_an %>%
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
-if(exists("df_c_duplicate_pt_nos_an")){
-  if(nrow(df_c_duplicate_pt_nos_an) > 0){
-    logic_output$df_c_duplicate_pt_nos_an <- df_c_duplicate_pt_nos_an
-  }
-}
+add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_duplicate_pt_nos_an")
+
+
 
 
 
