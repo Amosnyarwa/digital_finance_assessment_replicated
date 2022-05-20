@@ -5,6 +5,8 @@ library(lubridate)
 library(glue)
 
 source("R/support_functions.R")
+source("R/checks_for_other_responses.R")
+
 # read data
 
 df_tool_data_an <- readxl::read_excel("inputs/UGA2103_Financial_Service_Providers_Assessment_HH_Tool_June2021.xlsx") %>% 
@@ -395,7 +397,7 @@ tool_data_unique_pts_an <- df_tool_data_thresh_an %>%
 
 sample_pt_nos_thresh_an <- sample_data_unique_pts_an[sample_data_unique_pts_an %in% tool_data_unique_pts_an]
 
-if(length(sample_pt_nos_thresh) > 0){
+if(length(sample_pt_nos_thresh_an) > 0){
   
   # tibble to hold the data
   df_data_with_distance_an <- tibble()
@@ -436,6 +438,8 @@ if(length(sample_pt_nos_thresh) > 0){
            z.so_sm_choices = "") %>% 
     dplyr::select(starts_with("z."))%>% 
     rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
+  
+  add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_pt_not_in_sample_an")
 }
 
 if(exists("df_c_greater_thresh_distance_an")){
@@ -450,8 +454,7 @@ df_logic_checks <- bind_rows(logic_output)
 
 # others checks
 
-df_others_data <- extract_other_data(input_tool_data = df_tool_data, input_survey = df_survey, input_choices = df_choices)
-
+df_others_data <- extract_other_data_an(input_tool_data = df_tool_data_an, input_survey = df_survey, input_choices = df_choices)
 
 # combine logic and others checks
 df_combined_checks <- bind_rows(df_logic_checks, df_others_data)
