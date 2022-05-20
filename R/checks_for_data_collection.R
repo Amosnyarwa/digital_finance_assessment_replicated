@@ -16,7 +16,23 @@ df_tool_data_an <- readxl::read_excel("inputs/UGA2103_Financial_Service_Provider
         z.point_number = point_number,
         start = as_datetime(start),
         end = as_datetime(end)) %>% 
-  filter(consent == "yes", z.start_date > as_date("21-08-29"))
+  filter(consent == "yes", z.start_date > as_date("21-08-29"), z.point_number != "13m.", 
+         !z.start_date %in% c(as_date("2021-09-08"), as_date("2021-09-09"), 
+                                    as_date("2021-09-21")),
+         !str_detect(string = point_number, pattern = fixed('test', ignore_case = TRUE)),
+         !z.uuid %in% c("27b0ffe2-8d47-4897-b402-1928fd23cfb3",
+                              "40d216de-76db-42b7-9105-aea1ce234489",
+                              "f2f648df-55d6-4b9d-93ca-aa87c3bc30c7",
+                              "4167b891-b1ff-46b1-856b-532dd28e7a1e",
+                              "d7bde578-cdc2-4d77-b31b-a15c4cec9d38",
+                              "4f3afa4f-a065-4f6d-bd25-9919902f9ce0",
+                              "a89d0010-d626-4a4f-8b8c-e83e8fade349",
+                              "27ac9f75-3954-4c55-90a3-b5b09984fe7a",
+                              "48ee8073-a0d7-460f-9867-304a47bdb1fc",
+                              "b0a1c83dcdb24671b9eed78d7a77786f",
+                              "c5c9b13aa6cd43338e113d8c647c04ed",
+                              "d8936d35-7e1c-48d9-bafa-b25e758c05eb"
+         ))
 
 df_survey_an <- readxl::read_excel("inputs/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "survey")
 df_choices_an <- readxl::read_excel("inputs/UGA2103_Digital_Finace_HH_Tool_June2021.xlsx", sheet = "choices")
@@ -161,8 +177,6 @@ df_c_nationality_an <- df_tool_data_an %>%
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_nationality_an")
-
-     
         
 # Anyone who selected host for "type of community" and answers "refugee ID" or "beneficiary ID" should be checked.
 df_c_id_type_an <- df_tool_data_an %>% 
@@ -190,28 +204,26 @@ add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_
 
 # If respondents have selected a language but have NOT selected the same language that they previously selected for their main language, we need to check the survye.
 df_c_language_an <- df_tool_data_an %>% 
-  mutate(z.check.type = "change_response",
-         z.check.name = "main_language",
-         z.check.current_value = main_language,
-         z.check.value = "",
-         z.check.issue_id = ifelse(str_detect(string = language_understand, pattern = main_language, negate = TRUE) , 
+  mutate(z.type = "change_response",
+         z.name = "main_language",
+         z.current_value = main_language,
+         z.value = "",
+         z.issue_id = ifelse(str_detect(string = language_understand, pattern = main_language, negate = TRUE) , 
                                    "logic_c_main_language", "main_language_also_understood"),
-         z.check.issue = glue("main_language: {main_language} not in understood languages: {language_understand}"),
-         z.check.other_text = "",
-         z.check.checked_by = "",
-         z.check.checked_date = as_date(today()),
-         z.check.comment = "", 
-         z.check.reviewed = "",
-         z.check.adjust_log = "",
-         z.check.uuid_cl = "",
-         z.check.so_sm_choices = "") %>% 
-  filter(z.check.issue_id == "logic_c_main_language") %>% 
+         z.issue = glue("main_language: {main_language} not in understood languages: {language_understand}"),
+         z.other_text = "",
+         z.checked_by = "",
+         z.checked_date = as_date(today()),
+         z.comment = "", 
+         z.reviewed = "",
+         z.adjust_log = "",
+         z.uuid_cl = "",
+         z.so_sm_choices = "") %>% 
+  filter(z.issue_id == "logic_c_main_language") %>% 
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_language_an")
-
-
 
 # If respondent has selected "none" in addition to another option, the survey needs to be checked.
 # type_phone_owned
@@ -366,7 +378,7 @@ df_c_pt_not_in_sample_an <- df_tool_data_an %>%
          z.adjust_log = "",
          z.uuid_cl = "",
          z.so_sm_choices = "") %>% 
-  dplyr::select(starts_with("i.check"))%>% 
+  dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_pt_not_in_sample_an")
@@ -402,6 +414,7 @@ if(length(sample_pt_nos_thresh_an) > 0){
   for (pt_number in sample_pt_nos_thresh_an){
     current_sample <- df_sample_data_thresh_an %>% 
       filter(unique_pt_number == pt_number)
+    
     current_tool_data <- df_tool_data_thresh_an %>% 
       filter(unique_pt_number == pt_number) 
     
@@ -436,13 +449,7 @@ if(length(sample_pt_nos_thresh_an) > 0){
     dplyr::select(starts_with("z."))%>% 
     rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
   
-  add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_pt_not_in_sample_an")
-}
-
-if(exists("df_c_greater_thresh_distance_an")){
-  if(nrow(df_c_greater_thresh_distance_an) > 0){
-    logic_output$df_c_greater_thresh_distance_an <- df_c_greater_thresh_distance_an
-  }
+  add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_greater_thresh_distance_an")
 }
 
 # combine checks ----------------------------------------------------------
