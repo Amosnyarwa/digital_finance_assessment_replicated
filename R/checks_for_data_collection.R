@@ -53,7 +53,7 @@ df_no_consent_not_hoh <- df_tool_data_an %>%
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_no_consent_not_hoh")
 
-# below age
+# age out of range
 df_respondents_not_of_age <- df_tool_data_an %>% 
   filter(respondent_age < 18 | respondent_age > 100) %>% 
   mutate(z.type = "remove_survey",
@@ -101,7 +101,7 @@ df_c_survey_time_an <- df_tool_data_an %>%
          z.comment = "",
          z.reviewed = "",
          z.adjust_log = "",
-         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.uuid_cl = "",
          z.so_sm_choices = "") %>% 
   filter(z.issue_id %in% c("less_survey_time", "more_survey_time"))
 
@@ -131,16 +131,13 @@ df_c_survey_time_an <- df_tool_data_an %>%
          z.comment = "",
          z.reviewed = "",
          z.adjust_log = "",
-         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.uuid_cl = "",
          z.so_sm_choices = "") %>% 
   dplyr::select(starts_with("z.")) %>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_survey_time_an")
               
-  
-         
-
 # Logical checks ----------------------------------------------------------
 
 # Anyone who selected "ugandan" and previously answered community_type = refugee, should be checked
@@ -158,9 +155,9 @@ df_c_nationality_an <- df_tool_data_an %>%
          z.comment = "",
          z.reviewed = "",
          z.adjust_log = "",
-         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.uuid_cl = "",
          z.so_sm_choices = "") %>% 
-  dplyr::select(starts_with("i")) %>% 
+  dplyr::select(starts_with("z.")) %>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
 
 add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_c_nationality_an")
@@ -182,7 +179,7 @@ df_c_id_type_an <- df_tool_data_an %>%
          z.comment = "", 
          z.reviewed = "",
          z.adjust_log = "",
-         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.uuid_cl = "",
          z.so_sm_choices = "") %>% 
   dplyr::select(starts_with("z."))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
@@ -367,7 +364,7 @@ df_c_pt_not_in_sample_an <- df_tool_data_an %>%
          z.comment = "", 
          z.reviewed = "",
          z.adjust_log = "",
-         z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+         z.uuid_cl = "",
          z.so_sm_choices = "") %>% 
   dplyr::select(starts_with("i.check"))%>% 
   rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
@@ -434,7 +431,7 @@ if(length(sample_pt_nos_thresh_an) > 0){
            z.comment = "", 
            z.reviewed = "",
            z.adjust_log = "",
-           z.uuid_cl = paste0(z.uuid, "_", z.type, "_", z.name),
+           z.uuid_cl = "",
            z.so_sm_choices = "") %>% 
     dplyr::select(starts_with("z."))%>% 
     rename_with(~str_replace(string = .x, pattern = "z.", replacement = ""))
