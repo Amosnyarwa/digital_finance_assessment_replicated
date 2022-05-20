@@ -43,7 +43,7 @@ extract_other_data_an <- function(input_tool_data, input_survey, input_choices) 
   # extract parent question and join survey for extracting list_name
   df_data_parent_qns_an <- df_data_arranged_an %>% 
     left_join(input_survey %>% select(name, type), by = c("parent_qn" = "name")) %>% 
-    separate(col = type, into = c("select_type", "list_name"), sep = "", remove = TRUE, extra = "drop") %>% 
+    separate(col = type, into = c("select_type", "list_name"), sep = " ", remove = TRUE, extra = "drop") %>% 
     rename(name = parent_qn)
   
   # join other responses with choice options based on list_name
