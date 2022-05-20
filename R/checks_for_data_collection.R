@@ -55,13 +55,13 @@ add_checks_data_to_list(input_list_name = "logic_output", input_df_name = "df_no
 
 # below age
 df_respondents_not_of_age <- df_tool_data_an %>% 
-  filter(respondent_age < 18) %>% 
+  filter(respondent_age < 18 | respondent_age > 100) %>% 
   mutate(z.type = "remove_survey",
          z.name = "respondent_age",
          z.current_value = as.character(respondent_age),
          z.value = "",
-         z.issue_id = "logic_m_requirement_below_age",
-         z.issue = "below_age",
+         z.issue_id = "logic_m_requirement_age_out_of_range",
+         z.issue = "age_out_of_range",
          z.other_text = "",
          z.checked_by = "",
          z.checked_date = as_date(today()),
